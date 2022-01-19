@@ -1,9 +1,4 @@
 
-# Terraform provider for aws
-variable "aws_provider" {
-  type = string
-}
-
 # External ID for the OtterTune role. Copy from OtterTune role setup wizard.
 variable "external_id" {
   type = string

@@ -8,7 +8,6 @@ terraform {
 }
 
 provider "aws" {
-  # Configuration options
 }
 
 resource "aws_iam_role" "ottertune_role" {
@@ -55,6 +54,7 @@ data "aws_iam_policy_document" "ottertune_db_policy" {
   }
 }
 
+
 data "aws_iam_policy_document" "ottertune_connect_policy" {
   statement {
     actions = ["rds-db:connect"]
@@ -75,4 +75,23 @@ data "aws_iam_policy_document" "ottertune_cluster_tuning_policy" {
     actions = ["rds:ModifyDBParameterGroup"]
     resources = var.tunable_aurora_cluster_parameter_group_arns
   }
+}
+
+data "aws_iam_policy_document" "ottertune_policy_document_combined" {
+  source_policy_documents = [
+    data.aws_iam_policy_document.ottertune_db_policy.json,
+    data.aws_iam_policy_document.ottertune_connect_policy.json,
+    data.aws_iam_policy_document.ottertune_tuning_policy.json,
+    data.aws_iam_policy_document.ottertune_cluster_tuning_policy.json
+  ]
+}
+
+resource "aws_iam_policy" "ottertune_policy" {
+  name   = "ottertune_policy"
+  policy = data.aws_iam_policy_document.ottertune_policy_document_combined.json
+}
+
+resource "aws_iam_role_policy_attachment" "attach_db_policy" {
+  role       = "ottertune_role"
+  policy_arn = aws_iam_policy.ottertune_policy.arn
 }
