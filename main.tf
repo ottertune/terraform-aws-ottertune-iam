@@ -7,9 +7,6 @@ terraform {
   }
 }
 
-provider "aws" {
-}
-
 resource "aws_iam_role" "ottertune_role" {
   name = var.iam_role_name
 
