@@ -4,7 +4,7 @@ variable "external_id" {
   type = string
 }
 
-# External ID for the OtterTune role. Copy from OtterTune role setup wizard.
+# Role Name for the OtterTune role. This name can be whatever you like.```
 variable "iam_role_name" {
   type = string
   default = "OtterTuneRole"
