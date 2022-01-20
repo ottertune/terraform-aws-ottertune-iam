@@ -1,3 +1,3 @@
 output "ottertune_role_arn" {
-  value = aws_iam_policy.ottertune_policy.arn
+  value = aws_iam_role.ottertune_role.arn
 }

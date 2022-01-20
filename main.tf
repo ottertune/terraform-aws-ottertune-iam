@@ -7,25 +7,29 @@ terraform {
   }
 }
 
+data "aws_iam_policy_document" "assume_role_policy" {
+  statement {
+    sid = ""
+    effect = "Allow"
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      type = "AWS"
+      identifiers = ["arn:aws:iam::${var.ottertune_account_id}:root"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "s3:ExternalId"
+
+      values = [var.external_id]
+    }
+  }
+}
+
 resource "aws_iam_role" "ottertune_role" {
   name = var.iam_role_name
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Sid    = ""
-        Principal = {
-          AWS = "arn:aws:iam::${var.ottertune_account_id}:root"
-        }
-        Condition = {
-          StringEquals = var.external_id
-        }
-      },
-    ]
-  })
+  assume_role_policy = data.aws_iam_policy_document.assume_role_policy.json
 }
 
 data "aws_iam_policy_document" "ottertune_db_policy" {
@@ -75,12 +79,10 @@ data "aws_iam_policy_document" "ottertune_cluster_tuning_policy" {
 }
 
 data "aws_iam_policy_document" "ottertune_policy_document_combined" {
-  source_policy_documents = [
-    data.aws_iam_policy_document.ottertune_db_policy.json,
-    data.aws_iam_policy_document.ottertune_connect_policy.json,
-    data.aws_iam_policy_document.ottertune_tuning_policy.json,
-    data.aws_iam_policy_document.ottertune_cluster_tuning_policy.json
-  ]
+  source_policy_documents = concat([data.aws_iam_policy_document.ottertune_db_policy.json,
+          data.aws_iam_policy_document.ottertune_connect_policy.json],
+          length(var.tunable_parameter_group_arns) > 0 ? [data.aws_iam_policy_document.ottertune_tuning_policy.json]:[],
+          length(var.tunable_aurora_cluster_parameter_group_arns) > 0 ? [data.aws_iam_policy_document.ottertune_cluster_tuning_policy.json]:[])
 }
 
 resource "aws_iam_policy" "ottertune_policy" {
@@ -89,6 +91,6 @@ resource "aws_iam_policy" "ottertune_policy" {
 }
 
 resource "aws_iam_role_policy_attachment" "attach_db_policy" {
-  role       = "ottertune_role"
+  role       = aws_iam_role.ottertune_role.name
   policy_arn = aws_iam_policy.ottertune_policy.arn
 }
