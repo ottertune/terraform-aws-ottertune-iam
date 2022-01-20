@@ -2,7 +2,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = ">= 3.72.0"
+      version = ">= 3.53.0"
     }
   }
 }
@@ -86,7 +86,7 @@ data "aws_iam_policy_document" "ottertune_policy_document_combined" {
 }
 
 resource "aws_iam_policy" "ottertune_policy" {
-  name   = "ottertune_policy"
+  name   = "${var.iam_role_name}_policy"
   policy = data.aws_iam_policy_document.ottertune_policy_document_combined.json
 }
 
