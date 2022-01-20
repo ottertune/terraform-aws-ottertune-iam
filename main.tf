@@ -20,7 +20,7 @@ data "aws_iam_policy_document" "assume_role_policy" {
 
     condition {
       test     = "StringEquals"
-      variable = "s3:ExternalId"
+      variable = "sts:ExternalId"
 
       values = [var.external_id]
     }
