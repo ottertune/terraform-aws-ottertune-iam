@@ -1,20 +1,20 @@
 terraform {
   required_providers {
     aws = {
-      source = "hashicorp/aws"
-      version = "3.72.0"
+      source  = "hashicorp/aws"
+      version = ">= 3.72.0"
     }
   }
 }
 
 data "aws_iam_policy_document" "assume_role_policy" {
   statement {
-    sid = ""
-    effect = "Allow"
+    sid     = ""
+    effect  = "Allow"
     actions = ["sts:AssumeRole"]
 
     principals {
-      type = "AWS"
+      type        = "AWS"
       identifiers = ["arn:aws:iam::${var.ottertune_account_id}:root"]
     }
 
@@ -28,7 +28,7 @@ data "aws_iam_policy_document" "assume_role_policy" {
 }
 
 resource "aws_iam_role" "ottertune_role" {
-  name = var.iam_role_name
+  name               = var.iam_role_name
   assume_role_policy = data.aws_iam_policy_document.assume_role_policy.json
 }
 
@@ -58,7 +58,7 @@ data "aws_iam_policy_document" "ottertune_db_policy" {
 
 data "aws_iam_policy_document" "ottertune_connect_policy" {
   statement {
-    actions = ["rds-db:connect"]
+    actions   = ["rds-db:connect"]
     resources = ["arn:aws:rds-db:*:*:dbuser:*/ottertune*"]
   }
 }
@@ -66,23 +66,23 @@ data "aws_iam_policy_document" "ottertune_connect_policy" {
 
 data "aws_iam_policy_document" "ottertune_tuning_policy" {
   statement {
-    actions = ["rds:ModifyDBParameterGroup"]
+    actions   = ["rds:ModifyDBParameterGroup"]
     resources = var.tunable_parameter_group_arns
   }
 }
 
 data "aws_iam_policy_document" "ottertune_cluster_tuning_policy" {
   statement {
-    actions = ["rds:ModifyDBParameterGroup"]
+    actions   = ["rds:ModifyDBParameterGroup"]
     resources = var.tunable_aurora_cluster_parameter_group_arns
   }
 }
 
 data "aws_iam_policy_document" "ottertune_policy_document_combined" {
   source_policy_documents = concat([data.aws_iam_policy_document.ottertune_db_policy.json,
-          data.aws_iam_policy_document.ottertune_connect_policy.json],
-          length(var.tunable_parameter_group_arns) > 0 ? [data.aws_iam_policy_document.ottertune_tuning_policy.json]:[],
-          length(var.tunable_aurora_cluster_parameter_group_arns) > 0 ? [data.aws_iam_policy_document.ottertune_cluster_tuning_policy.json]:[])
+    data.aws_iam_policy_document.ottertune_connect_policy.json],
+    length(var.tunable_parameter_group_arns) > 0 ? [data.aws_iam_policy_document.ottertune_tuning_policy.json] : [],
+  length(var.tunable_aurora_cluster_parameter_group_arns) > 0 ? [data.aws_iam_policy_document.ottertune_cluster_tuning_policy.json] : [])
 }
 
 resource "aws_iam_policy" "ottertune_policy" {

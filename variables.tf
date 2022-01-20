@@ -6,7 +6,7 @@ variable "external_id" {
 
 # Role Name for the OtterTune role. This name can be whatever you like.```
 variable "iam_role_name" {
-  type = string
+  type    = string
   default = "OtterTuneRole"
 }
 
@@ -14,7 +14,7 @@ variable "iam_role_name" {
 # Leave blank if you would like to run OtterTune in monitoring-only mode for now. This can be updated later.
 # ARN Format: arn:aws:rds:<region>:<account>:pg:<name>
 variable "tunable_parameter_group_arns" {
-  type = list(string)
+  type    = list(string)
   default = []
 }
 
@@ -22,11 +22,11 @@ variable "tunable_parameter_group_arns" {
 # Leave blank if you would like to run OtterTune in monitoring-only mode for now. This can be updated later.
 # ARN Format: arn:aws:rds:<region>:<account>:pg:<name>
 variable "tunable_aurora_cluster_parameter_group_arns" {
-  type = list(string)
+  type    = list(string)
   default = []
 }
 
 variable "ottertune_account_id" {
-  type = string
+  type    = string
   default = "691523222388"
 }
