@@ -35,7 +35,6 @@ resource "aws_iam_role" "ottertune_role" {
 data "aws_iam_policy_document" "ottertune_db_policy" {
   statement {
     actions = [
-      "aws-portal:ViewBilling",
       "budgets:Describe*",
       "ce:Describe*",
       "ce:Get*",
@@ -46,8 +45,6 @@ data "aws_iam_policy_document" "ottertune_db_policy" {
       "iam:SimulatePrincipalPolicy",
       "pi:DescribeDimensionKeys",
       "pi:GetResourceMetrics",
-      "pricing:Describe*",
-      "pricing:Get*",
       "rds:Describe*",
       "rds:List*",
     ]
