@@ -70,7 +70,7 @@ data "aws_iam_policy_document" "ottertune_tuning_policy" {
 
 data "aws_iam_policy_document" "ottertune_cluster_tuning_policy" {
   statement {
-    actions   = ["rds:ModifyDBParameterGroup"]
+    actions   = ["rds:ModifyDBClusterParameterGroup"]
     resources = var.tunable_aurora_cluster_parameter_group_arns
   }
 }
