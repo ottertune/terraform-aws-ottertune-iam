@@ -34,7 +34,7 @@ resource "aws_iam_role" "ottertune_role" {
 
 data "aws_iam_policy_document" "ottertune_db_policy" {
   statement {
-    actions = [
+    actions = flatten([
       "budgets:Describe*",
       "ce:Describe*",
       "ce:Get*",
@@ -47,7 +47,11 @@ data "aws_iam_policy_document" "ottertune_db_policy" {
       "pi:GetResourceMetrics",
       "rds:Describe*",
       "rds:List*",
-    ]
+      var.permissions_level == "write_limited" ? [
+      "rds:ModifyDBInstance",
+      "rds:ModifyDBCluster",
+      ] : []
+    ])
     resources = ["*"]
   }
 }
@@ -57,6 +61,42 @@ data "aws_iam_policy_document" "ottertune_connect_policy" {
   statement {
     actions   = ["rds-db:connect"]
     resources = ["arn:aws:rds-db:*:*:dbuser:*/ottertune*"]
+  }
+}
+
+
+data "aws_iam_policy_document" "ottertune_copy_pg_policy" {
+  statement {
+    actions   = [
+      "rds:CopyDBParameterGroup",
+      "rds:CopyDBClusterParameterGroup",
+    ]
+    resources = [
+      "arn:aws:rds:*:*:pg:*",
+      "arn:aws:rds:*:*:cluster-pg:*"
+    ]
+  }
+}
+
+
+data "aws_iam_policy_document" "ottertune_pg_policy" {
+  statement {
+    actions   = [
+      "rds:CreateDBParameterGroup",
+      "rds:ModifyDBParameterGroup",
+    ]
+    resources = ["arn:aws:rds:*:*:pg:ottertune*"]
+  }
+}
+
+
+data "aws_iam_policy_document" "ottertune_cluster_pg_policy" {
+  statement {
+    actions   = [
+      "rds:CreateDBClusterParameterGroup",
+      "rds:ModifyDBClusterParameterGroup",
+    ]
+    resources = ["arn:aws:rds:*:*:cluster-pg:ottertune*"]
   }
 }
 
@@ -78,6 +118,7 @@ data "aws_iam_policy_document" "ottertune_cluster_tuning_policy" {
 data "aws_iam_policy_document" "ottertune_policy_document_combined" {
   source_policy_documents = concat([data.aws_iam_policy_document.ottertune_db_policy.json,
     data.aws_iam_policy_document.ottertune_connect_policy.json],
+    var.permissions_level == "write_limited" ? [data.aws_iam_policy_document.ottertune_copy_pg_policy.json, data.aws_iam_policy_document.ottertune_pg_policy.json, data.aws_iam_policy_document.ottertune_cluster_pg_policy.json] :  [],
     length(var.tunable_parameter_group_arns) > 0 ? [data.aws_iam_policy_document.ottertune_tuning_policy.json] : [],
   length(var.tunable_aurora_cluster_parameter_group_arns) > 0 ? [data.aws_iam_policy_document.ottertune_cluster_tuning_policy.json] : [])
 }

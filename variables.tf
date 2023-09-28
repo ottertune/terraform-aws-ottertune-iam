@@ -10,6 +10,12 @@ variable "iam_role_name" {
   default = "OtterTuneRole"
 }
 
+variable "permissions_level" {
+  description = "The permissions level associated with the created role. Currently the two options are: read_only | write_limited"
+  type    = string
+  default = "read_only"
+}
+
 variable "tunable_parameter_group_arns" {
   description = <<-EOT
                    Pass in the parameter group ARNs that you would like to allow OtterTune to optimize. 
