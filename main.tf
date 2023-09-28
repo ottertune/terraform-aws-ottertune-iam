@@ -34,7 +34,7 @@ resource "aws_iam_role" "ottertune_role" {
 
 data "aws_iam_policy_document" "ottertune_db_policy" {
   statement {
-    actions = var.permissions_level == "write_limited" ? [
+    actions = flatten([
       "budgets:Describe*",
       "ce:Describe*",
       "ce:Get*",
@@ -47,22 +47,11 @@ data "aws_iam_policy_document" "ottertune_db_policy" {
       "pi:GetResourceMetrics",
       "rds:Describe*",
       "rds:List*",
+      var.permissions_level == "write_limited" ? [
       "rds:ModifyDBInstance",
       "rds:ModifyDBCluster",
-    ] : [
-      "budgets:Describe*",
-      "ce:Describe*",
-      "ce:Get*",
-      "ce:List*",
-      "cloudwatch:Describe*",
-      "cloudwatch:Get*",
-      "cloudwatch:List*",
-      "iam:SimulatePrincipalPolicy",
-      "pi:DescribeDimensionKeys",
-      "pi:GetResourceMetrics",
-      "rds:Describe*",
-      "rds:List*",
-    ]
+      ] : []
+    ])
     resources = ["*"]
   }
 }
